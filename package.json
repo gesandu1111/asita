@@ -1,12 +1,12 @@
 {
-  "name": "ASITHA-MD",
+  "name": "GESANDU-MD",
   "version": "1.0.0",
-  "description": "A WhatsApp bot created using Node.js",
+  "description": "Sinhala-branded WhatsApp bot created by gesandu 🦾🇱🇰",
   "main": "index.js",
   "scripts": {
-    "start": "pm2 start start.js --deep-monitoring --attach --name ASITHA-MD",
-    "stop": "pm2 stop ASITHA-MD",
-    "restart": "pm2 restart ASITHA-MD"
+    "start": "pm2 start start.js --deep-monitoring --attach --name GESANDU-MD",
+    "stop": "pm2 stop GESANDU-MD",
+    "restart": "pm2 restart GESANDU-MD"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "github:Hupa11/Asithamdb",
@@ -48,7 +48,7 @@
     "form-data": "latest",
     "youtubedl-core": "latest",
     "fluent-ffmpeg": "latest",
-    "@sl-code-lords/esana-news" : "latest",
+    "@sl-code-lords/esana-news": "latest",
     "nayan-media-downloader": "latest",
     "getscreenshot.js": "latest",
     "@google/generative-ai": "latest",
@@ -56,12 +56,12 @@
     "@mrnima/facebook-downloader": "latest",
     "@dark-yasiya/imgbb.js": "latest",
     "adm-zip": "^0.5.16",
-    "@dark-yasiya/news-scrap" : "latest",
-    "sharp":"0.32.6",
-    "acrcloud":"latest",
-    "xml2js":"0.6.2",
+    "@dark-yasiya/news-scrap": "latest",
+    "sharp": "0.32.6",
+    "acrcloud": "latest",
+    "xml2js": "0.6.2",
     "jimp": "0.16.1",
     "cricketlive": "latest",
-    "node-cache":  "latest"
+    "node-cache": "latest"
   }
 }
