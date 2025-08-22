@@ -11,6 +11,22 @@ const { getGroupAdmins } = require('./lib/functions');
 const ownerNumber = Array.isArray(config.OWNER_NUM) ? config.OWNER_NUM : [config.OWNER_NUM];
 
 async function startBot() {
+  // 🔐 Auto-download session from config.SESSION_ID if not exists
+  if (config.SESSION_ID && !fs.existsSync('./auth_info_baileys/creds.json')) {
+    console.log('📥 Downloading session from config SESSION_ID...');
+    const { File } = require('megajs');
+    const filer = File.fromURL(`https://mega.nz/file/${config.SESSION_ID}`);
+    await new Promise((resolve, reject) => {
+      filer.download((err, data) => {
+        if (err) return reject(err);
+        fs.mkdirSync('./auth_info_baileys', { recursive: true });
+        fs.writeFileSync('./auth_info_baileys/creds.json', Buffer.from(data));
+        console.log('✅ Session downloaded successfully!');
+        resolve();
+      });
+    });
+  }
+
   const { state, saveCreds } = await useMultiFileAuthState('./auth_info_baileys');
 
   const sock = makeWASocket({
@@ -34,7 +50,7 @@ async function startBot() {
     console.log(`✅ ${commands.length} plugins loaded successfully.`);
   }
 
-  // Connection updates
+  // 🔄 Connection updates
   sock.ev.on('connection.update', (update) => {
     const { connection, lastDisconnect, qr } = update;
 
@@ -50,7 +66,7 @@ async function startBot() {
     }
   });
 
-  // Message handler
+  // 💬 Message handler
   sock.ev.on('messages.upsert', async (meks) => {
     let mek = meks.messages[0];
     if (!mek.message) return;
@@ -84,6 +100,7 @@ async function startBot() {
     const isAdmins = isGroup ? groupAdmins.includes(sender) : false;
     const reply = (text) => sock.sendMessage(from, { text }, { quoted: mek });
 
+    // 🔌 Run command if matched
     if (isCmd) {
       const cmdObj = commands.find(c => c.pattern === command) || commands.find(c => c.alias?.includes(command));
       if (cmdObj) {
@@ -101,4 +118,5 @@ async function startBot() {
   });
 }
 
+// 🔥 Start the bot
 startBot();
