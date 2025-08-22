@@ -1,10 +1,10 @@
-// index.js
+// start.js
 const { default: makeWASocket, useMultiFileAuthState, DisconnectReason, jidNormalizedUser, getContentType } = require('@whiskeysockets/baileys');
 const pino = require('pino');
 const fs = require('fs');
 const path = require('path');
 
-const config = require('./config'); // SESSION_ID, OWNER_NUM, etc.
+const config = require('./config'); // SESSION_ID, OWNER_NUM, PREFIX
 const { sms } = require('./lib/msg');
 const { getGroupAdmins } = require('./lib/functions');
 
@@ -23,11 +23,15 @@ async function startBot() {
 
   // 🔌 Plugins Loader
   const pluginsPath = path.join(__dirname, 'plugins');
+  const commands = [];
   if (fs.existsSync(pluginsPath)) {
     fs.readdirSync(pluginsPath).forEach(file => {
-      if (path.extname(file).toLowerCase() === '.js') require(path.join(pluginsPath, file));
+      if (path.extname(file).toLowerCase() === '.js') {
+        const cmd = require(path.join(pluginsPath, file));
+        if (cmd && cmd.pattern) commands.push(cmd);
+      }
     });
-    console.log('✅ All plugins loaded successfully.');
+    console.log(`✅ ${commands.length} plugins loaded successfully.`);
   }
 
   // Connection updates
@@ -42,9 +46,7 @@ async function startBot() {
     } else if (connection === 'open') {
       console.log('✅ Bot connected successfully!');
       // Auto-send message to owner
-      ownerNumber.forEach(num => {
-        sock.sendMessage(num + '@s.whatsapp.net', { text: '🤖 Bot is now active!' });
-      });
+      ownerNumber.forEach(num => sock.sendMessage(num + '@s.whatsapp.net', { text: '🤖 Bot is now active!' }));
     }
   });
 
@@ -55,7 +57,7 @@ async function startBot() {
     mek.message = getContentType(mek.message) === 'ephemeralMessage' ? mek.message.ephemeralMessage.message : mek.message;
     if (mek.key?.remoteJid === 'status@broadcast') return;
 
-    const m = sms(sock, mek); // your helper function
+    const m = sms(sock, mek);
     const type = getContentType(mek.message);
     const body =
       type === 'conversation' ? mek.message.conversation :
@@ -83,9 +85,7 @@ async function startBot() {
     const reply = (text) => sock.sendMessage(from, { text }, { quoted: mek });
 
     if (isCmd) {
-      const events = require('./command'); // your command loader
-      const cmdObj = events.commands.find(c => c.pattern === command) ||
-                     events.commands.find(c => c.alias?.includes(command));
+      const cmdObj = commands.find(c => c.pattern === command) || commands.find(c => c.alias?.includes(command));
       if (cmdObj) {
         try {
           cmdObj.function(sock, mek, m, {
